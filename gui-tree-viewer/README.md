@@ -2,7 +2,7 @@
 
 A lightweight graphical application for browsing GnuCash account hierarchies and extracting account GUIDs. Built with Python's tkinter for a native look and feel across platforms.
 
-![Screenshot](screenshot.png) *(Add a screenshot of your application here)*
+![Screenshot](screenshot.png) 
 
 ## Features
 
