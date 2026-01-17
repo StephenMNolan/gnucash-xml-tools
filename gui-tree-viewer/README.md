@@ -157,22 +157,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-[Choose your license - MIT, GPL, etc.]
+This project is released under the MIT License. See LICENSE file for details.
 
 ## Author
 
-[Your name/username]
+Created to help developers and power users work more efficiently with GnuCash account structures.
 
 ## Acknowledgments
 
-- Built for the GnuCash community
+- GnuCash project for maintaining excellent XML documentation
+- The Python community for robust standard library XML tools
 - Uses Python's built-in tkinter for cross-platform GUI support
-
-## Related Projects
-
-- [GnuCash](https://gnucash.org/) - Free and open-source accounting software
-- [piecash](https://github.com/sdementen/piecash) - Pythonic interface to GnuCash files
-
-## Support
-
-If you encounter any issues or have questions, please [open an issue](https://github.com/yourusername/gnucash-tree-viewer/issues) on GitHub.
