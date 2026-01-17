@@ -27,18 +27,14 @@ GnuCash's "hidden" account flag keeps accounts visible in the account tree while
 
 ## Installation
 
-Simply download the script:
+Simply download `gnucash_prepend_x.py` and make it executable:
 
 ```bash
-wget https://raw.githubusercontent.com/YOUR_USERNAME/gnucash-account-prefixer/main/gnucash_prepend_x.py
+# Linux/macOS
 chmod +x gnucash_prepend_x.py
-```
 
-Or clone the repository:
-
-```bash
-git clone https://github.com/YOUR_USERNAME/gnucash-account-prefixer.git
-cd gnucash-account-prefixer
+# Or run with python3 on any platform
+python3 gnucash_prepend_x.py
 ```
 
 ## Usage
