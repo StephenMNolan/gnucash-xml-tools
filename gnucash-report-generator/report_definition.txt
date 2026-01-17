@@ -1,0 +1,304 @@
+# GnuCash Report Definition Template V12
+# 
+# SYNTAX REFERENCE:
+# ================
+#
+# Lines starting with # are comments and are ignored by the parser.
+# Any occurrence of a hashtag "#" anywhere in a line causes everything after to be 
+# ignored as a comment.
+# To use a hashtag in a text field, escape it with backslash: "\#"
+# To put a backslash in a text field, escape it as well: "\\"
+#
+# CONFIGURATION SECTION (optional - all fields have sensible defaults):
+# ========================================================================
+#
+# All configuration fields are optional. If omitted, the following defaults apply:
+#   START_DATE: BY (Beginning of current Year - January 1)
+#   END_DATE: EY (End of current Year - December 31)
+#   PERIOD: m (monthly)
+#   ACCOUNT_NAME: name_only
+#   INVERT_INCOME: true
+#
+# You only need to specify configuration values that differ from these defaults.
+#
+#   START_DATE: YYYY-MM-DD or abbreviation (optional, defaults to BY)
+#     - First day to include in report
+#     - If omitted, defaults to BY (Beginning of current Year - Jan 1)
+#     - Standard format: START_DATE: 2025-01-01
+#     - Abbreviations supported (case-insensitive):
+#         TODAY - Current date
+#         BPY   - Beginning of Previous Year (Jan 1 of last year)
+#         BPQ   - Beginning of Previous Quarter
+#         BPM   - Beginning of Previous Month
+#         BY    - Beginning of current Year (Jan 1)
+#         BQ    - Beginning of current Quarter
+#         BM    - Beginning of current Month
+#     - Examples:
+#         START_DATE: 2025-01-01
+#         START_DATE: BPY
+#         START_DATE: BM
+#
+#   END_DATE: YYYY-MM-DD or abbreviation (optional, defaults to EY)
+#     - Last day to include in report
+#     - If omitted, defaults to EY (End of current Year - Dec 31)
+#     - Standard format: END_DATE: 2025-12-31
+#     - Abbreviations supported (case-insensitive):
+#         TODAY - Current date
+#         EPY   - End of Previous Year (Dec 31 of last year)
+#         EPQ   - End of Previous Quarter
+#         EPM   - End of Previous Month
+#         EY    - End of current Year (Dec 31)
+#         EQ    - End of current Quarter
+#         EM    - End of current Month
+#     - Examples:
+#         END_DATE: 2025-12-31
+#         END_DATE: EPM
+#         END_DATE: TODAY
+#     - Common combinations:
+#         Full previous year: START_DATE: BPY, END_DATE: EPY
+#         Full previous month: START_DATE: BPM, END_DATE: EPM
+#         Full previous quarter: START_DATE: BPQ, END_DATE: EPQ
+#
+#   PERIOD: m (monthly) or q (quarterly)
+#     - How to group transactions (defaults to 'm' if not specified)
+#     - Case-insensitive: M, m, Q, q all accepted
+#     - m = monthly periods (Jan 2025, Feb 2025, etc.)
+#     - q = quarterly periods (1Q 2025, 2Q 2025, etc.)
+#
+#   ACCOUNT_NAME: full_path or name_only
+#     - Controls how account names are displayed (defaults to 'name_only' if not specified)
+#     - Case-insensitive: Full_Path, FULL_PATH, Name_Only, NAME_ONLY all accepted
+#     - full_path: Shows "Income:Salary:Base Pay"
+#     - name_only: Shows just "Base Pay"
+#
+#   GNUCASH_FILE: /path/to/file.gnucash (optional)
+#     - Specifies the GnuCash file to use for the report
+#     - Can be placed in the CONFIGURATION SECTION at the top of the file
+#     - If provided on command line, command line argument overrides this setting
+#     - If not provided in either location, program will error
+#     - Example: GNUCASH_FILE: /home/user/finances/2025.gnucash
+#
+#   CSV_FILE: /path/to/output.csv (optional)
+#     - Specifies where to write the CSV output
+#     - If not specified, defaults to <report_definition_name>.csv
+#     - Command line --stdout flag overrides this setting
+#     - Examples:
+#         CSV_FILE: reports/monthly_income.csv
+#         CSV_FILE: /tmp/report.csv
+#
+#   INVERT_INCOME: true or false (optional, defaults to true)
+#     - GnuCash reports income as negative values (accounting credits)
+#     - Setting to true inverts them to positive values for user-friendly display
+#     - Case-insensitive: True, TRUE, False, FALSE all accepted
+#     - Example: INVERT_INCOME: true
+#
+# REPORT COMMANDS:
+# ================
+#
+#   SECTION: Section Title
+#     - Creates a section header row in the output
+#     - Section name appears in first column, subsequent columns are blank
+#     - Automatically preceded by 2 blank rows (except for first section)
+#     - Example: SECTION: Income & Deductions
+#
+#   TITLE: Column Header Text
+#     - Creates a title row with the text in first column
+#     - Subsequent columns show date ranges (e.g., "Jan 2024", "Feb 2024" or "1Q 2024", "2Q 2024")
+#     - Automatically preceded by 1 blank row (except first after SECTION)
+#     - Example: TITLE: Gross Income
+#
+#   ACCOUNT: guid [operation] | Optional Custom Label
+#     - Pulls single account balance for each period
+#     - guid: 32-character hex GUID from GnuCash (use account tree viewer to find)
+#     - If no label provided after |, uses account name from GnuCash (format per ACCOUNT_NAME config)
+#     - Optional operation can be applied: * / + - %
+#     - Examples:
+#         ACCOUNT: 1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p
+#         ACCOUNT: 1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p | Custom Description
+#         ACCOUNT: 1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p * 90% | 90% of Account Value
+#         ACCOUNT: 1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p / 12 | Monthly Average
+#
+#   ACCOUNTS: guid [operation] | Optional Custom Label
+#     - Same as ACCOUNT: but includes all descendant subaccounts recursively
+#     - Aggregates transactions from the specified account AND all its children/grandchildren/etc.
+#     - Useful for getting totals across entire account hierarchies
+#     - Optional operation and label work the same as ACCOUNT:
+#     - Examples:
+#         ACCOUNTS: 1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p | Total Medical Expenses
+#         ACCOUNTS: 1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p * 90% | 90% of All Transportation Costs
+#
+#   FILTER: guid
+#     - Must immediately follow an ACCOUNT: or ACCOUNTS: line
+#     - Only includes transactions where one of the splits involves the specified account
+#     - Useful for filtering transactions in accounts with multiple transaction types
+#     - Works with both ACCOUNT: and ACCOUNTS: commands
+#     - Example: Filter 401k deposits to only show payroll contributions
+#         ACCOUNT: 401k_account_guid
+#         FILTER: payroll_account_guid
+#
+#   REGEX: "pattern" [-"exclude_pattern"]
+#     - Must immediately follow an ACCOUNT: or ACCOUNTS: line (optionally after FILTER)
+#     - Filters transactions based on description/notes fields
+#     - **CASE-INSENSITIVE**: All pattern matching ignores case
+#     - Use quotes around patterns
+#     - Use | within quotes for OR: "pattern1|pattern2"
+#     - Prefix with - to exclude: -"exclude_pattern"
+#     - Works with both ACCOUNT: and ACCOUNTS: commands
+#     - Can combine multiple patterns for AND logic (all must match)
+#     - Examples:
+#         REGEX: "CD"                              # Contains "CD" or "cd" or "Cd"
+#         REGEX: "T-Note|T-Bond"                   # Contains "T-Note" OR "T-Bond" (any case)
+#         REGEX: -"Redemption"                     # Does NOT contain "Redemption" (any case)
+#         REGEX: "T-Note|T-Bond" -"Redemption"     # (T-Note OR T-Bond) AND NOT Redemption
+#         REGEX: "Treasury" "Note"                 # Contains BOTH "Treasury" AND "Note" (any case)
+#
+#   PLACEHOLDER: Description | val1,val2,val3,...
+#     - Creates a row with predefined values for each period
+#     - Number of values must match number of periods
+#     - Useful for manual entries or values from external sources
+#     - Example: PLACEHOLDER: Manual Adjustment | 100.00,150.00,200.00
+#
+#   SUM: Description
+#     - Sums all ACCOUNT, ACCOUNTS, and PLACEHOLDER rows since the last SUM, CALC, or TITLE
+#     - Description appears in first column
+#     - Example: SUM: Total Income
+#
+#   CALC: Description | formula
+#     - Performs calculation using [n] references
+#     - Formula supports: +, -, *, /, %, and parentheses
+#     - Each period is calculated independently
+#     - Examples:
+#         CALC: Net Income | [1] - [2] - [3]
+#         CALC: Average | [1] / 12
+#         CALC: Depletion | [1] * 15%
+#
+#   BLANK:
+#     - Inserts a blank row for spacing (rarely needed due to auto-spacing)
+#
+#   [n] prefix: Mark a row for reference in CALC formulas
+#     - Can prefix any ACCOUNT, ACCOUNTS, PLACEHOLDER, SUM, or CALC row
+#     - Examples:
+#         [1] SUM: Total Income
+#         [2] ACCOUNT: 3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r | Medical Insurance
+#         [3] CALC: Subtotal | [1] - [2]
+#     - Each [n] must be unique (parser will error on duplicates)
+#     - CALC formulas can only reference defined [n] values
+#
+# AUTOMATIC SPACING:
+# ==================
+#   - 2 blank rows automatically inserted before each SECTION (except first)
+#   - 1 blank row automatically inserted before each TITLE (except first after SECTION)
+#   - Manual BLANK: commands still available for special cases
+#
+# OUTPUT FORMAT:
+# ==============
+#   CSV file with:
+#     - First column: Section/Account/Description
+#     - Subsequent columns: One per period with date range headers
+#     - Last column: TOTAL (sum across all periods)
+#     - Section rows have section name in first column only
+#     - TITLE rows have description in first column, date ranges in period columns
+#     - Data rows have description in first column, values in period columns, total in last
+#     - BLANK rows are completely empty
+#     - Fields with commas, quotes, or newlines are automatically quoted
+#
+# DEBUG MODE:
+# ===========
+#   Run with --debug flag to see:
+#     - Which transactions matched FILTER criteria
+#     - Which transactions matched REGEX patterns
+#     - Raw values before filters
+#     - Filtered values after each transformation
+#     - Final values after operations
+#     - Transaction descriptions and amounts for verification
+#     - Cache building statistics
+#
+# RUNNING THE REPORT:
+# ===================
+#   # Generate CSV to file (default - uses CSV_FILE setting or <definition>.csv)
+#   python gnucash_report_generator.py report_definition.txt
+#
+#   # Debug mode (detailed breakdown)
+#   python gnucash_report_generator.py report_definition.txt --debug
+#
+#   # Output CSV to stdout (allows piping/redirection)
+#   python gnucash_report_generator.py report_definition.txt --stdout > custom.csv
+#   python gnucash_report_generator.py report_definition.txt --stdout | grep Income
+#
+#   # Use specific GnuCash file (overrides file in definition)
+#   python gnucash_report_generator.py report_definition.txt /path/to/other.gnucash
+#
+# DATE ABBREVIATION EXAMPLES:
+# ===========================
+#   # Complete previous year
+#   START_DATE: BPY      # January 1 of last year
+#   END_DATE: EPY       # December 31 of last year
+#
+#   # Complete previous month
+#   START_DATE: BPM      # First day of previous month
+#   END_DATE: EPM       # Last day of previous month
+#
+#   # Complete previous quarter
+#   START_DATE: BPQ      # First day of previous quarter
+#   END_DATE: EPQ       # Last day of previous quarter
+#
+#   # Year-to-date report
+#   START_DATE: BY      # January 1 of current year
+#   END_DATE: TODAY     # Today's date
+#
+#   # Current quarter-to-date
+#   START_DATE: BQ      # First day of current quarter
+#   END_DATE: TODAY     # Today
+#
+#   # Current month-to-date
+#   START_DATE: BM      # First day of current month
+#   END_DATE: TODAY     # Today
+#
+# ================================================================================
+# EXAMPLE REPORT DEFINITION
+# ================================================================================
+
+# Report Configuration
+START_DATE: BPY                  # Beginning of previous year
+END_DATE: EPY                    # End of previous year
+PERIOD: m                        # Monthly periods
+ACCOUNT_NAME: name_only          # Show account names only (not full paths)
+GNUCASH_FILE: ./MyFinances.gnucash
+CSV_FILE: reports/annual_summary.csv
+INVERT_INCOME: true             # Show income as positive values
+
+# Income Statement Example
+SECTION: Income
+
+TITLE: Salary Income
+ACCOUNT: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | Primary Job Salary
+ACCOUNT: yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy | Secondary Income
+[1] SUM: Total Salary Income
+
+TITLE: Investment Income
+ACCOUNT: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz | Interest Income
+FILTER: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  # Filter to specific brokerage account
+REGEX: "CD"  # Only CD interest (case-insensitive)
+ACCOUNT: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb | Dividend Income
+[2] SUM: Total Investment Income
+
+[3] CALC: Total Income | [1] + [2]
+
+SECTION: Expenses
+
+TITLE: Housing Expenses
+ACCOUNTS: cccccccccccccccccccccccccccccccc | Total Housing Costs
+ACCOUNT: dddddddddddddddddddddddddddddddd | Utilities
+[4] SUM: Total Housing
+
+TITLE: Transportation
+ACCOUNTS: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee | Total Auto Expenses
+ACCOUNT: ffffffffffffffffffffffffffffffffffff | Public Transit
+[5] SUM: Total Transportation
+
+[6] SUM: Total Expenses
+
+SECTION: Summary
+
+TITLE: Net Income/Loss
+CALC: Net Result | [3] - [6]
