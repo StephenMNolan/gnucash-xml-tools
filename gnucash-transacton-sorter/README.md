@@ -214,7 +214,7 @@ The code is extensively commented with high-level overviews for each module. Key
 
 ## License
 
-This project is released into the public domain. Use it however you like!
+MIT License.
 
 ## Acknowledgments
 
