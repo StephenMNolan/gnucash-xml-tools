@@ -7,6 +7,7 @@ A collection of Python utilities for viewing, analyzing, and manipulating GnuCas
 While GnuCash is powerful accounting software, there are times when you need to:
 - Quickly view your account structure without opening the full application
 - Generate custom financial reports with flexible formatting and calculations
+- Reorder transactions on the same date to fix running balances
 - Batch process hidden account statuses
 - Modify account names programmatically for better report organization
 - Work with GnuCash files in automated workflows
@@ -15,13 +16,13 @@ These tools fill those gaps by working directly with the GnuCash XML file format
 
 ## Available Tools
 
-### 📊 [Account Tree Viewers](command-line-tree-viewer/)
+### 📊 [Account Tree Viewers](gnucash-tree-viewer-command-line/)
 
 Two complementary tools for visualizing your GnuCash account hierarchy:
 
-- **[Command-Line Tree Viewer](command-line-tree-viewer/)**: Fast, text-based visualization of your account tree. Perfect for quick checks, terminal workflows, and scripting. Shows account types, balances, and hidden status in a clean tree format.
+- **[Command-Line Tree Viewer](gnucash-tree-viewer-command-line/)**: Fast, text-based visualization of your account tree. Perfect for quick checks, terminal workflows, and scripting. Shows account types, balances, and hidden status in a clean tree format.
 
-- **[GUI Tree Viewer](gui-tree-viewer/)**: Interactive graphical viewer with expandable/collapsible tree structure. Ideal for exploring complex account hierarchies with visual feedback.
+- **[GUI Tree Viewer](gnucash-tree-viewer-gui/)**: Interactive graphical viewer with expandable/collapsible tree structure. Ideal for exploring complex account hierarchies with visual feedback.
 
 ### 📈 [Report Generator](gnucash-report-generator/)
 
@@ -35,13 +36,26 @@ A powerful tool for generating custom financial reports from GnuCash XML files:
 - **CSV Export**: Professional spreadsheet-ready output with proper formatting
 - **Debug Mode**: Detailed breakdown showing all intermediate calculations
 
-### 🔧 [Account Management Tools](propagate-hidden/)
+### 🔄 [Transaction Sorter](gnucash-transaction-sorter/)
+
+A powerful graphical tool for reordering transactions within an account on a specific date:
+
+- **Visual Reordering**: Simple up/down buttons to change transaction order
+- **Running Balance Display**: See real-time balance calculations as you reorder
+- **Safe File Handling**: Automatic backups and lock file management
+- **Smart Account Selection**: Tree view showing only accounts with sortable transactions
+- **Persistent Configuration**: Remembers your last file, account, and window position
+- **Change Detection**: Prompts before discarding unsaved changes
+
+Perfect for fixing transaction order when multiple transactions occur on the same date and you need the running balance to reflect the correct sequence.
+
+### 🔧 [Account Management Tools](gnucash-propagate-hidden/)
 
 Utilities for managing account visibility and organization:
 
-- **[Hidden Status Propagator](propagate-hidden/)**: Automatically propagates the "hidden" flag from parent accounts to all their children. Ensures consistent visibility throughout your account tree.
+- **[Hidden Status Propagator](gnucash-propagate-hidden/)**: Automatically propagates the "hidden" flag from parent accounts to all their children. Ensures consistent visibility throughout your account tree.
 
-- **[Account Name Prefixer](prepend-x/)**: Prepends a customizable prefix (default: "X ") to hidden account names, making them sort to the end of reports and easy to filter out.
+- **[Account Name Prefixer](gnucash-prepend-x/)**: Prepends a customizable prefix (default: "X ") to hidden account names, making them sort to the end of reports and easy to filter out.
 
 ## Quick Start
 
@@ -53,7 +67,7 @@ git clone https://github.com/StephenMNolan/gnucash-xml-tools.git
 cd gnucash-xml-tools
 
 # Navigate to the tool you want
-cd propagate-hidden
+cd gnucash-propagate-hidden
 
 # Read the specific README
 cat README.md
@@ -85,7 +99,25 @@ python gnucash_report_generator.py my_report.txt --debug
 python gnucash_report_generator.py my_report.txt --stdout > custom.csv
 ```
 
-### Workflow 2: Clean Up Archived Accounts
+### Workflow 2: Fix Transaction Order and Running Balance
+
+When you have multiple transactions on the same date and need to reorder them:
+
+```bash
+cd gnucash-transaction-sorter
+
+# Run the Transaction Sorter
+python gnucash_transaction_sorter.py
+
+# 1. Select your GnuCash file
+# 2. Choose the account
+# 3. Pick the date with multiple transactions
+# 4. Use up/down buttons to reorder
+# 5. Watch the running balance update in real-time
+# 6. Click "Commit Changes" to save
+```
+
+### Workflow 3: Clean Up Archived Accounts
 
 When you have old accounts you want to hide from reports:
 
@@ -93,33 +125,34 @@ When you have old accounts you want to hide from reports:
 # 1. Manually hide parent accounts in GnuCash (e.g., "Old 401k", "Closed Accounts")
 # 2. Close GnuCash
 # 3. Propagate hidden status to all children
-cd propagate-hidden
+cd gnucash-propagate-hidden
 python gnucash_propagate_hidden.py ~/myfile.gnucash --apply
 
 # 4. Prefix all hidden accounts for report filtering
-cd ../prepend-x
+cd ../gnucash-prepend-x
 python gnucash_prepend_x.py ~/myfile.gnucash --apply
 
 # 5. Reopen in GnuCash - all archived accounts now prefixed with "X "
 ```
 
-### Workflow 3: Quick Account Structure Review
+### Workflow 4: Quick Account Structure Review
 
 When you need to see your account structure without opening GnuCash:
 
 ```bash
 # View in terminal
-cd command-line-tree-viewer
+cd gnucash-tree-viewer-command-line
 python gnucash_tree_viewer.py ~/myfile.gnucash
 
 # Or use the GUI for interactive exploration
-cd ../gui-tree-viewer
+cd ../gnucash-tree-viewer-gui
 python gnucash_gui_tree.py ~/myfile.gnucash
 ```
 
 ## Requirements
 
 - **Python 3.6+** (developed and tested with Python 3.14)
+- **tkinter** for GUI tools (usually included with Python)
 - **No external dependencies** - all tools use Python standard library only
 - **Tested on macOS** - should work on Linux and Windows but not extensively tested
 
@@ -130,6 +163,7 @@ All modification tools include:
 - ✅ **Dry-run mode by default** - preview changes before applying
 - ✅ **Format preservation** - maintains gzip compression and XML structure
 - ✅ **Non-destructive operations** - only add data, never remove
+- ✅ **Lock file management** - prevents concurrent file access (Transaction Sorter)
 
 ## File Format Support
 
@@ -150,6 +184,7 @@ These tools work with:
 | **Command-Line Viewer** | View account tree | ❌ No | ❌ No | Quick lookups, scripts |
 | **GUI Viewer** | Browse account tree | ❌ No | ✅ Yes | Exploring complex trees |
 | **Report Generator** | Create custom reports | ❌ No | ❌ No | Financial analysis, CSV export |
+| **Transaction Sorter** | Reorder transactions | ✅ Yes | ✅ Yes | Fixing running balances |
 | **Hidden Propagator** | Cascade hidden flag | ✅ Yes | ❌ No | Batch hiding accounts |
 | **Name Prefixer** | Prefix account names | ✅ Yes | ❌ No | Report organization |
 
